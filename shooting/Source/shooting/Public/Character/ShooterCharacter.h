@@ -6,6 +6,7 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+
 UCLASS()
 class SHOOTING_API AShooterCharacter : public ACharacter
 {
@@ -14,10 +15,14 @@ class SHOOTING_API AShooterCharacter : public ACharacter
 public:
 	AShooterCharacter();
 
-
-
 protected:
 	virtual void BeginPlay() override;
+
+	/*
+	* Input functions
+	*/
+	void MoveForward(float Value);
+	void MoveRight(float Value);
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -30,7 +35,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* Camera;
-
 
 	void CreateSpringArm();
 	void CreateCamera();
