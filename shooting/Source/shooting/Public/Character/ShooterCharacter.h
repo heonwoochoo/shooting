@@ -24,6 +24,7 @@ protected:
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 
+
 public:	
 	virtual void Tick(float DeltaTime) override;
 
@@ -36,8 +37,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* Camera;
 
+
+
 	void CreateSpringArm();
-	void CreateCamera();
+	void CreateCamera();	
 
 public:
 	FORCEINLINE USpringArmComponent* GetSpringArm() const { return SpringArm; }

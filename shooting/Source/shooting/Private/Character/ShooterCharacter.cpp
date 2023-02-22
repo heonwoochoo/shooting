@@ -57,6 +57,7 @@ void AShooterCharacter::MoveRight(float Value)
 	}
 }
 
+
 void AShooterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -71,6 +72,9 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	{
 		PlayerInputComponent->BindAxis("MoveForward", this, &AShooterCharacter::MoveForward);
 		PlayerInputComponent->BindAxis("MoveRight", this, &AShooterCharacter::MoveRight);
+		PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
+		PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
+		PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ACharacter::Jump);
 	}
 }
 
