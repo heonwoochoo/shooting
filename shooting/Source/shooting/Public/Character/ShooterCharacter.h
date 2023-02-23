@@ -6,6 +6,7 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+class USoundCue;
 
 UCLASS()
 class SHOOTING_API AShooterCharacter : public ACharacter
@@ -15,6 +16,8 @@ class SHOOTING_API AShooterCharacter : public ACharacter
 public:
 	AShooterCharacter();
 
+	
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -23,7 +26,7 @@ protected:
 	*/
 	void MoveForward(float Value);
 	void MoveRight(float Value);
-
+	void FireWeapon();
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -37,11 +40,13 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* Camera;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	USoundCue* FireSound;
 
 
 	void CreateSpringArm();
 	void CreateCamera();	
-
+	void BlockCharacterRotationWithCamera();
 public:
 	FORCEINLINE USpringArmComponent* GetSpringArm() const { return SpringArm; }
 	FORCEINLINE UCameraComponent* GetCamera() const { return Camera; }

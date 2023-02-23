@@ -19,10 +19,6 @@ public:
 	virtual void NativeInitializeAnimation() override;
 
 private:
-	void SetIsAccelerating();
-	void SetIsInAir();
-	void SetCharacterSpeed();
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"));
 	AShooterCharacter* ShooterCharacter;
 	
@@ -37,4 +33,8 @@ private:
 	/**  Whether or not the character is moving */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"));
 	bool bIsAccelerating;
+
+	void SetIsAccelerating();
+	void SetIsInAir();
+	void SetCharacterSpeed();
 };

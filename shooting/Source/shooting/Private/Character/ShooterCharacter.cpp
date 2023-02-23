@@ -1,6 +1,9 @@
 #include "Character/ShooterCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -8,6 +11,22 @@ AShooterCharacter::AShooterCharacter()
 
 	CreateSpringArm();
 	CreateCamera();
+	BlockCharacterRotationWithCamera();
+
+	// Configure character movement
+	GetCharacterMovement()->bOrientRotationToMovement = true;	// Character move in the direction of input
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 500.f, 0.f);
+	GetCharacterMovement()->JumpZVelocity = 600.f;
+	GetCharacterMovement()->AirControl = 0.2f;
+}
+
+
+// Don't Rotate when the character controller rotates
+void AShooterCharacter::BlockCharacterRotationWithCamera()
+{
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationRoll = false;
 }
 
 void AShooterCharacter::CreateSpringArm()
@@ -30,6 +49,7 @@ void AShooterCharacter::CreateCamera()
 void AShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	
 }
 
@@ -58,6 +78,16 @@ void AShooterCharacter::MoveRight(float Value)
 }
 
 
+// Called when Firebutton is pressed
+void AShooterCharacter::FireWeapon()
+{
+	if (FireSound)
+	{
+		UGameplayStatics::PlaySound2D(this, FireSound);
+	}
+}
+
+
 void AShooterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -75,6 +105,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 		PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 		PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ACharacter::Jump);
+		PlayerInputComponent->BindAction("FireButton", EInputEvent::IE_Pressed, this, &AShooterCharacter::FireWeapon);
 	}
 }
 
