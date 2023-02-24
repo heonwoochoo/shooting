@@ -7,6 +7,8 @@
 class USpringArmComponent;
 class UCameraComponent;
 class USoundCue;
+class UParticleSystem;
+class UAnimMontage;
 
 UCLASS()
 class SHOOTING_API AShooterCharacter : public ACharacter
@@ -43,6 +45,17 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	USoundCue* FireSound;
 
+	/** Flash spawned at BarrelSocket */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	UParticleSystem* MuzzleFlash;
+
+	/** Montage for firing the weapon */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* HitFireMontage;
+
+	/** Montage play when level start */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* LevelStartMontage;
 
 	void CreateSpringArm();
 	void CreateCamera();	

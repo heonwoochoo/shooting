@@ -4,6 +4,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
+#include "Engine/SkeletalMeshSocket.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -50,7 +51,12 @@ void AShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && LevelStartMontage)
+	{
+		AnimInstance->Montage_Play(LevelStartMontage);
+		AnimInstance->Montage_JumpToSection(FName("LevelStart"));
+	}
 }
 
 void AShooterCharacter::MoveForward(float Value)
@@ -84,6 +90,23 @@ void AShooterCharacter::FireWeapon()
 	if (FireSound)
 	{
 		UGameplayStatics::PlaySound2D(this, FireSound);
+	}
+
+	const USkeletalMeshSocket* BarrelSocket = GetMesh()->GetSocketByName("BarrelSocket");
+	if (BarrelSocket)
+	{
+		const FTransform SocketTransform = BarrelSocket->GetSocketTransform(GetMesh());
+		if (MuzzleFlash)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, SocketTransform);
+		}
+	}
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && HitFireMontage)
+	{
+		AnimInstance->Montage_Play(HitFireMontage);
+		AnimInstance->Montage_JumpToSection(FName("StartFire"));
 	}
 }
 
