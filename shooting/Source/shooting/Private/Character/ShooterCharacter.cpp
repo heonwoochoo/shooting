@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "DrawDebugHelpers.h"
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -100,6 +101,19 @@ void AShooterCharacter::FireWeapon()
 		{
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, SocketTransform);
 		}
+
+		FHitResult FireHit;
+		const FVector Start = SocketTransform.GetLocation();
+		const FQuat Rotation = SocketTransform.GetRotation();
+		const FVector RotationAxis = Rotation.GetAxisX();
+		const FVector End = Start + RotationAxis * 50000.f; // 시작 위치 + x축 방향 벡터 * 길이
+
+		GetWorld()->LineTraceSingleByChannel(FireHit, Start, End, ECollisionChannel::ECC_Visibility);
+		if (FireHit.bBlockingHit)
+		{
+			DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 2.f);
+			DrawDebugPoint(GetWorld(), FireHit.Location, 5.f, FColor::Red, false, 2.f);
+		}
 	}
 
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -144,4 +158,3 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		PlayerInputComponent->BindAction("FireButton", EInputEvent::IE_Pressed, this, &AShooterCharacter::FireWeapon);
 	}
 }
-
