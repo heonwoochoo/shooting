@@ -30,9 +30,12 @@ protected:
 	void MoveRight(float Value);
 	void FireWeapon();
 
+	UFUNCTION(BlueprintCallable)
+	void SpawnLevelStartParticle();
+
 public:	
 	virtual void Tick(float DeltaTime) override;
-
+	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
@@ -56,6 +59,9 @@ private:
 	/** Montage play when level start */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* LevelStartMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	UParticleSystem* LevelStartParticle;
 
 	void CreateSpringArm();
 	void CreateCamera();	

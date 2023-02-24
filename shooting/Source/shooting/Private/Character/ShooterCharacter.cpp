@@ -110,6 +110,19 @@ void AShooterCharacter::FireWeapon()
 	}
 }
 
+void AShooterCharacter::SpawnLevelStartParticle()
+{
+	const USkeletalMeshSocket* Socket = GetMesh()->GetSocketByName("LevelStart");
+	if (Socket)
+	{
+		const FTransform SocketTransform = Socket->GetSocketTransform(GetMesh());
+		if (LevelStartParticle)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), LevelStartParticle, SocketTransform);
+		}
+	}
+}
+
 
 void AShooterCharacter::Tick(float DeltaTime)
 {
