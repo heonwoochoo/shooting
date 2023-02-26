@@ -17,7 +17,7 @@ AShooterCharacter::AShooterCharacter()
 	BlockCharacterRotationWithCamera();
 
 	// Configure character movement
-	GetCharacterMovement()->bOrientRotationToMovement = true;	// Character move in the direction of input
+	GetCharacterMovement()->bOrientRotationToMovement = false;	// Character move in the direction of input
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 500.f, 0.f);
 	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->AirControl = 0.2f;
@@ -28,7 +28,7 @@ AShooterCharacter::AShooterCharacter()
 void AShooterCharacter::BlockCharacterRotationWithCamera()
 {
 	bUseControllerRotationPitch = false;
-	bUseControllerRotationYaw = false;
+	bUseControllerRotationYaw = true;
 	bUseControllerRotationRoll = false;
 }
 
@@ -38,6 +38,7 @@ void AShooterCharacter::CreateSpringArm()
 	SpringArm->SetupAttachment(GetRootComponent());
 	SpringArm->TargetArmLength = 300.f;
 	SpringArm->bUsePawnControlRotation = true;
+	SpringArm->SocketOffset = FVector(0.f, 50.f, 50.f);
 }
 
 void AShooterCharacter::CreateCamera()
