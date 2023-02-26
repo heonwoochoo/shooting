@@ -63,6 +63,10 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	UParticleSystem* LevelStartParticle;
 
+	/** Particles spawned upon bullet impact */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	UParticleSystem* ImpactParticles;
+
 	void CreateSpringArm();
 	void CreateCamera();	
 	void BlockCharacterRotationWithCamera();
