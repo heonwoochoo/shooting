@@ -11,7 +11,9 @@
 AShooterCharacter::AShooterCharacter()
 	: bAiming(false),
 	CameraDefaultFOV(0.f),	// set in BeginPlay
-	CameraZoomedFOV(60.f)
+	CameraZoomedFOV(35.f),
+	CameraCurrentFOV(0.f),
+	ZoomInterpSpeed(20.f)
 {
  	PrimaryActorTick.bCanEverTick = true;
 
@@ -26,6 +28,31 @@ AShooterCharacter::AShooterCharacter()
 	GetCharacterMovement()->AirControl = 0.2f;
 }
 
+void AShooterCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (Camera)
+	{
+		CameraDefaultFOV = GetCamera()->FieldOfView;
+		CameraCurrentFOV = CameraDefaultFOV;
+	}
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && LevelStartMontage)
+	{
+		AnimInstance->Montage_Play(LevelStartMontage);
+		AnimInstance->Montage_JumpToSection(FName("LevelStart"));
+	}
+}
+
+void AShooterCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// Handle interpolation for zoom when aiming
+	CameraInterpZoom(DeltaTime);
+}
 
 // Don't Rotate when the character controller rotates
 void AShooterCharacter::BlockCharacterRotationWithCamera()
@@ -39,9 +66,9 @@ void AShooterCharacter::CreateSpringArm()
 {
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());
-	SpringArm->TargetArmLength = 300.f;
+	SpringArm->TargetArmLength = 180.f;
 	SpringArm->bUsePawnControlRotation = true;
-	SpringArm->SocketOffset = FVector(0.f, 50.f, 50.f);
+	SpringArm->SocketOffset = FVector(0.f, 50.f, 70.f);
 }
 
 void AShooterCharacter::CreateCamera()
@@ -53,22 +80,7 @@ void AShooterCharacter::CreateCamera()
 
 
 
-void AShooterCharacter::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	if (Camera)
-	{
-		CameraDefaultFOV = GetCamera()->FieldOfView;
-	}
 
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && LevelStartMontage)
-	{
-		AnimInstance->Montage_Play(LevelStartMontage);
-		AnimInstance->Montage_JumpToSection(FName("LevelStart"));
-	}
-}
 
 void AShooterCharacter::MoveForward(float Value)
 {
@@ -243,18 +255,27 @@ void AShooterCharacter::SpawnLevelStartParticle()
 void AShooterCharacter::AimingButtonPressed()
 {
 	bAiming = true;
-	GetCamera()->SetFieldOfView(CameraZoomedFOV);
 }
 
 void AShooterCharacter::AimingButtonReleased()
 {
 	bAiming = false;
-	GetCamera()->SetFieldOfView(CameraDefaultFOV);
 }
 
-void AShooterCharacter::Tick(float DeltaTime)
+void AShooterCharacter::CameraInterpZoom(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+	// Set current camera field of view
+	if (bAiming)
+	{
+		// Interpolate to zoomed FOV
+		CameraCurrentFOV = FMath::FInterpTo(CameraCurrentFOV, CameraZoomedFOV, DeltaTime, ZoomInterpSpeed);
+	}
+	else
+	{
+		// Interpolate to default FOV
+		CameraCurrentFOV = FMath::FInterpTo(CameraCurrentFOV, CameraDefaultFOV, DeltaTime, ZoomInterpSpeed);
+	}
+	GetCamera()->SetFieldOfView(CameraCurrentFOV);
 }
 
 void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
