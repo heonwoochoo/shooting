@@ -1,6 +1,7 @@
 #include "Character/ShooterAnimInstance.h"
 #include "Character/ShooterCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 {
@@ -15,6 +16,22 @@ void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 		SetIsInAir();
 		SetIsAccelerating();
 	}
+
+	FRotator AimRotation = ShooterCharacter->GetBaseAimRotation();
+	FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(ShooterCharacter->GetVelocity());
+	MovementOffsetYaw = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AimRotation).Yaw;
+
+
+
+	//FString RotationMessage = FString::Printf(TEXT("Base Aim Rotation: %f"), AimRotation.Yaw);
+	//FString MovementMessage = FString::Printf(TEXT("Movement Rotation: %f"), MovementRotation.Yaw);
+	//FString MovementOffsetYawMessage = FString::Printf(TEXT("MovementOffsetYaw: %f"), MovementOffsetYaw);
+	/*if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(1, 0.f, FColor::White, RotationMessage);
+		GEngine->AddOnScreenDebugMessage(2, 0.f, FColor::White, MovementMessage);
+		GEngine->AddOnScreenDebugMessage(3, 0.f, FColor::White, MovementOffsetYawMessage);
+	}*/
 }
 
 void UShooterAnimInstance::NativeInitializeAnimation()
