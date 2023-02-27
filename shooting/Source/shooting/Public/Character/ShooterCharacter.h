@@ -40,6 +40,11 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void SpawnLevelStartParticle();
 
+	/** Set bAiming to true or false with button press */
+	void AimingButtonPressed();
+	void AimingButtonReleased();
+
+
 public:	
 	virtual void Tick(float DeltaTime) override;
 	
@@ -77,6 +82,17 @@ private:
 	/** Smoke trail for bullets */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	UParticleSystem* BeamParticles;
+
+	/** True when aiming */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	bool bAiming;
+
+	/** Default camera field of view value */
+	float CameraDefaultFOV;
+
+	/** Field of view value for when zoomed in */
+	float CameraZoomedFOV;
+
 
 	void CreateSpringArm();
 	void CreateCamera();	

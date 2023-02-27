@@ -9,6 +9,9 @@
 #include "Particles/ParticleSystemComponent.h"
 
 AShooterCharacter::AShooterCharacter()
+	: bAiming(false),
+	CameraDefaultFOV(0.f),	// set in BeginPlay
+	CameraZoomedFOV(60.f)
 {
  	PrimaryActorTick.bCanEverTick = true;
 
@@ -54,6 +57,11 @@ void AShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (Camera)
+	{
+		CameraDefaultFOV = GetCamera()->FieldOfView;
+	}
+
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && LevelStartMontage)
 	{
@@ -232,11 +240,21 @@ void AShooterCharacter::SpawnLevelStartParticle()
 	}
 }
 
+void AShooterCharacter::AimingButtonPressed()
+{
+	bAiming = true;
+	GetCamera()->SetFieldOfView(CameraZoomedFOV);
+}
+
+void AShooterCharacter::AimingButtonReleased()
+{
+	bAiming = false;
+	GetCamera()->SetFieldOfView(CameraDefaultFOV);
+}
 
 void AShooterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -251,5 +269,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 		PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ACharacter::Jump);
 		PlayerInputComponent->BindAction("FireButton", EInputEvent::IE_Pressed, this, &AShooterCharacter::FireWeapon);
+		PlayerInputComponent->BindAction("AimingButton", EInputEvent::IE_Pressed, this, &AShooterCharacter::AimingButtonPressed);
+		PlayerInputComponent->BindAction("AimingButton", EInputEvent::IE_Released, this, &AShooterCharacter::AimingButtonReleased);
 	}
 }
