@@ -90,95 +90,20 @@ void AShooterCharacter::MoveRight(float Value)
 // Called when Firebutton is pressed
 void AShooterCharacter::FireWeapon()
 {
-	if (FireSound)
-	{
-		UGameplayStatics::PlaySound2D(this, FireSound);
-	}
+	PlayFireSound();
 
 	const USkeletalMeshSocket* BarrelSocket = GetMesh()->GetSocketByName("BarrelSocket");
 	if (BarrelSocket)
 	{
 		const FTransform SocketTransform = BarrelSocket->GetSocketTransform(GetMesh());
-		if (MuzzleFlash)
+		SpawnMuzzleFlashParticles(SocketTransform);
+
+		FVector BeamEnd;
+		bool bBeamEnd = GetBeamEndLocation(SocketTransform.GetLocation(), BeamEnd);
+		if (bBeamEnd)
 		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, SocketTransform);
-		}
-
-		// Get current size of the viewport
-		FVector2D ViewportSize;
-		if (GEngine && GEngine->GameViewport)
-		{
-			GEngine->GameViewport->GetViewportSize(ViewportSize);
-		}
-
-		// Get screen space location of crosshair
-		FVector2D CrossHairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
-		CrossHairLocation.Y -= 50.f;
-
-		FVector CrossHairWorldPosition;
-		FVector CrossHairWorldDirection;
-
-		// Get world position and direction of crosshair
-		bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(this, 0), 
-			CrossHairLocation,
-			CrossHairWorldPosition, 
-			CrossHairWorldDirection);
-
-		if (bScreenToWorld)	// was deprojection successful ?
-		{
-			FHitResult ScreenTraceHit;
-			const FVector Start = CrossHairWorldPosition;
-			const FVector End = CrossHairWorldPosition + CrossHairWorldDirection * 50000.f;
-			
-			FVector BeamEndPoint = End;	// set beam end point to line trace end point
-			
-			// Trace outward from crosshair world location
-			GetWorld()->LineTraceSingleByChannel(
-				ScreenTraceHit,
-				Start,
-				End,
-				ECollisionChannel::ECC_Visibility
-			);
-
-			if (ScreenTraceHit.bBlockingHit)	// was there a trace hit ?
-			{
-				// Beam end point is now trace hit location
-				BeamEndPoint = ScreenTraceHit.Location;
-			}
-
-			// Perform a second trace, this time from the gun barrel
-			FHitResult WeaponTraceHit;
-			const FVector WeaponTraceStart = SocketTransform.GetLocation();
-			const FVector WeaponTraceEnd = BeamEndPoint;
-			GetWorld()->LineTraceSingleByChannel(
-				WeaponTraceHit,
-				WeaponTraceStart,
-				WeaponTraceEnd,
-				ECollisionChannel::ECC_Visibility
-			);
-			if (WeaponTraceHit.bBlockingHit) // object between barrel and BeamEndPoint ?
-			{
-				BeamEndPoint = WeaponTraceHit.Location;
-			}
-
-			// Spawn impact particles after updating BeamEndPoint
-			if (ImpactParticles)
-			{
-				UGameplayStatics::SpawnEmitterAtLocation(
-					GetWorld(),
-					ImpactParticles,
-					BeamEndPoint
-				);
-			}
-
-			if (BeamParticles)
-			{
-				UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BeamParticles, SocketTransform);
-				if (Beam)
-				{
-					Beam->SetVectorParameter(FName("Target"), BeamEndPoint);
-				}
-			}
+			SpawnImpactParticles(BeamEnd);
+			SpawnBeamParticles(SocketTransform, BeamEnd);
 		}
 	}
 
@@ -187,6 +112,110 @@ void AShooterCharacter::FireWeapon()
 	{
 		AnimInstance->Montage_Play(HitFireMontage);
 		AnimInstance->Montage_JumpToSection(FName("StartFire"));
+	}
+}
+
+void AShooterCharacter::SpawnMuzzleFlashParticles(const FTransform& SocketTransform)
+{
+	if (MuzzleFlash)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), MuzzleFlash, SocketTransform);
+	}
+}
+
+void AShooterCharacter::PlayFireSound()
+{
+	if (FireSound)
+	{
+		UGameplayStatics::PlaySound2D(this, FireSound);
+	}
+}
+
+bool AShooterCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBeamLocation)
+{
+	// Get current size of the viewport
+	FVector2D ViewportSize;
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+	}
+
+	// Get screen space location of crosshair
+	FVector2D CrossHairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+	CrossHairLocation.Y -= 50.f;
+
+	FVector CrossHairWorldPosition;
+	FVector CrossHairWorldDirection;
+
+	// Get world position and direction of crosshair
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(UGameplayStatics::GetPlayerController(this, 0),
+		CrossHairLocation,
+		CrossHairWorldPosition,
+		CrossHairWorldDirection);
+	
+	if (bScreenToWorld)	// was deprojection successful ?
+	{
+		FHitResult ScreenTraceHit;
+		const FVector Start = CrossHairWorldPosition;
+		const FVector End = CrossHairWorldPosition + CrossHairWorldDirection * 50000.f;
+
+		OutBeamLocation = End;	// set beam end point to line trace end point
+
+		// Trace outward from crosshair world location
+		GetWorld()->LineTraceSingleByChannel(
+			ScreenTraceHit,
+			Start,
+			End,
+			ECollisionChannel::ECC_Visibility
+		);
+
+		if (ScreenTraceHit.bBlockingHit)	// was there a trace hit ?
+		{
+			// Beam end point is now trace hit location
+			OutBeamLocation = ScreenTraceHit.Location;
+		}
+
+		// Perform a second trace, this time from the gun barrel
+		FHitResult WeaponTraceHit;
+		const FVector WeaponTraceStart = MuzzleSocketLocation;
+		const FVector WeaponTraceEnd = OutBeamLocation;
+		GetWorld()->LineTraceSingleByChannel(
+			WeaponTraceHit,
+			WeaponTraceStart,
+			WeaponTraceEnd,
+			ECollisionChannel::ECC_Visibility
+		);
+		if (WeaponTraceHit.bBlockingHit) // object between barrel and BeamEndPoint ?
+		{
+			OutBeamLocation = WeaponTraceHit.Location;
+		}
+		return true;
+	}
+	return false;
+}
+
+void AShooterCharacter::SpawnBeamParticles(const FTransform& SocketTransform, const FVector& BeamEnd)
+{
+	if (BeamParticles)
+	{
+		UParticleSystemComponent* Beam = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BeamParticles, SocketTransform);
+		if (Beam)
+		{
+			Beam->SetVectorParameter(FName("Target"), BeamEnd);
+		}
+	}
+}
+
+void AShooterCharacter::SpawnImpactParticles(const FVector& BeamEnd)
+{
+	// Spawn impact particles after updating BeamEndPoint
+	if (ImpactParticles)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			ImpactParticles,
+			BeamEnd
+		);
 	}
 }
 

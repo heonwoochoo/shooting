@@ -28,7 +28,14 @@ protected:
 	*/
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+
+
 	void FireWeapon();
+	void SpawnMuzzleFlashParticles(const FTransform& SocketTransform);
+	void PlayFireSound();
+	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBeamLocation);
+	void SpawnBeamParticles(const FTransform& SocketTransform, const FVector& BeamEnd);
+	void SpawnImpactParticles(const FVector& BeamEnd);
 
 	UFUNCTION(BlueprintCallable)
 	void SpawnLevelStartParticle();
