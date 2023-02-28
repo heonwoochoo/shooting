@@ -24,12 +24,6 @@ AShooterCharacter::AShooterCharacter() :
 	CameraZoomedFOV(35.f),
 	CameraCurrentFOV(0.f),
 	ZoomInterpSpeed(20.f),
-	TargetArmLengthDefault(180.f),
-	TargetArmLengthZoomed(130.f),
-	TargetArmLengthCurrent(0.f),
-	SocketOffsetDefault(0.f,50.f,70.f),
-	SocketOffsetZoomed(0.f, -10.f, 65.f),
-	SocketOffsetCurrent(0.f, 0.f, 0.f),
 	CrosshairSpreadMultiplier(0.f),
 	CrosshairVelocityFactor(0.f),
 	CrosshairInAirFactor(0.f),
@@ -63,13 +57,6 @@ void AShooterCharacter::BeginPlay()
 		CameraDefaultFOV = GetCamera()->FieldOfView;
 		CameraCurrentFOV = CameraDefaultFOV;
 		
-	}
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	if (AnimInstance && LevelStartMontage)
-	{
-		AnimInstance->Montage_Play(LevelStartMontage);
-		AnimInstance->Montage_JumpToSection(FName("LevelStart"));
 	}
 }
 
@@ -108,10 +95,8 @@ void AShooterCharacter::CreateSpringArm()
 {
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());
-	TargetArmLengthCurrent = TargetArmLengthDefault;
-	SpringArm->TargetArmLength = TargetArmLengthCurrent;
-	SocketOffsetCurrent = SocketOffsetDefault;
-	SpringArm->SocketOffset = SocketOffsetCurrent;
+	SpringArm->TargetArmLength = 180.f;
+	SpringArm->SocketOffset = FVector(0.f,50.f,70.f);
 	SpringArm->bUsePawnControlRotation = true;
 }
 
@@ -189,7 +174,7 @@ void AShooterCharacter::FireWeapon()
 {
 	PlayFireSound();
 
-	const USkeletalMeshSocket* BarrelSocket = GetMesh()->GetSocketByName("BarrelSocket");
+	const USkeletalMeshSocket* BarrelSocket = GetMesh()->GetSocketByName("SMG_Barrel");
 	if (BarrelSocket)
 	{
 		const FTransform SocketTransform = BarrelSocket->GetSocketTransform(GetMesh());
@@ -317,19 +302,6 @@ void AShooterCharacter::SpawnImpactParticles(const FVector& BeamEnd)
 	}
 }
 
-void AShooterCharacter::SpawnLevelStartParticle()
-{
-	const USkeletalMeshSocket* Socket = GetMesh()->GetSocketByName("LevelStart");
-	if (Socket)
-	{
-		const FTransform SocketTransform = Socket->GetSocketTransform(GetMesh());
-		if (LevelStartParticle)
-		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), LevelStartParticle, SocketTransform);
-		}
-	}
-}
-
 void AShooterCharacter::AimingButtonPressed()
 {
 	bAiming = true;
@@ -347,27 +319,13 @@ void AShooterCharacter::CameraInterpZoom(float DeltaTime)
 	{
 		// Interpolate to zoomed FOV
 		CameraCurrentFOV = FMath::FInterpTo(CameraCurrentFOV, CameraZoomedFOV, DeltaTime, ZoomInterpSpeed);
-		
-		TargetArmLengthCurrent = FMath::FInterpTo(TargetArmLengthCurrent, TargetArmLengthZoomed, DeltaTime, ZoomInterpSpeed);
-	
-		SocketOffsetCurrent.X = FMath::FInterpTo(SocketOffsetCurrent.X, SocketOffsetZoomed.X, DeltaTime, ZoomInterpSpeed);
-		SocketOffsetCurrent.Y = FMath::FInterpTo(SocketOffsetCurrent.Y, SocketOffsetZoomed.Y, DeltaTime, ZoomInterpSpeed);
-		SocketOffsetCurrent.Z = FMath::FInterpTo(SocketOffsetCurrent.Z, SocketOffsetZoomed.Z, DeltaTime, ZoomInterpSpeed);
 	}
 	else
 	{
 		// Interpolate to default FOV
 		CameraCurrentFOV = FMath::FInterpTo(CameraCurrentFOV, CameraDefaultFOV, DeltaTime, ZoomInterpSpeed);
-		
-		TargetArmLengthCurrent = FMath::FInterpTo(TargetArmLengthCurrent, TargetArmLengthDefault, DeltaTime, ZoomInterpSpeed);
-		
-		SocketOffsetCurrent.X = FMath::FInterpTo(SocketOffsetCurrent.X, SocketOffsetDefault.X, DeltaTime, ZoomInterpSpeed);
-		SocketOffsetCurrent.Y = FMath::FInterpTo(SocketOffsetCurrent.Y, SocketOffsetDefault.Y, DeltaTime, ZoomInterpSpeed);
-		SocketOffsetCurrent.Z = FMath::FInterpTo(SocketOffsetCurrent.Z, SocketOffsetDefault.Z, DeltaTime, ZoomInterpSpeed);
 	}
 	GetCamera()->SetFieldOfView(CameraCurrentFOV);
-	SpringArm->TargetArmLength = TargetArmLengthCurrent;
-	SpringArm->SocketOffset = SocketOffsetCurrent;
 }
 
 void AShooterCharacter::SetLookRates()

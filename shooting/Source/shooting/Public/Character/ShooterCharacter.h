@@ -39,9 +39,6 @@ protected:
 	void SpawnBeamParticles(const FTransform& SocketTransform, const FVector& BeamEnd);
 	void SpawnImpactParticles(const FVector& BeamEnd);
 
-	UFUNCTION(BlueprintCallable)
-	void SpawnLevelStartParticle();
-
 	/** Set bAiming to true or false with button press */
 	void AimingButtonPressed();
 	void AimingButtonReleased();
@@ -124,13 +121,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* HitFireMontage;
 
-	/** Montage play when level start */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
-	UAnimMontage* LevelStartMontage;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
-	UParticleSystem* LevelStartParticle;
-
 	/** Particles spawned upon bullet impact */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	UParticleSystem* ImpactParticles;
@@ -157,18 +147,6 @@ private:
 	/** Interpolation speed for zooming when aiming */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	float ZoomInterpSpeed;
-
-	float TargetArmLengthDefault;
-
-	float TargetArmLengthZoomed;
-
-	float TargetArmLengthCurrent;
-
-	FVector SocketOffsetDefault;
-
-	FVector SocketOffsetZoomed;
-
-	FVector SocketOffsetCurrent;
 
 	/** Determines the spread of the crosshairs */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshairs, meta = (AllowPrivateAccess = "true"))
