@@ -8,8 +8,10 @@
 #include "DrawDebugHelpers.h"
 #include "Particles/ParticleSystemComponent.h"
 
-AShooterCharacter::AShooterCharacter()
-	: bAiming(false),
+AShooterCharacter::AShooterCharacter() :
+	BaseTurnRate(1.f),
+	BaseLookUpRate(1.f),
+	bAiming(false),
 	CameraDefaultFOV(0.f),	// set in BeginPlay
 	CameraZoomedFOV(35.f),
 	CameraCurrentFOV(0.f),
@@ -44,6 +46,16 @@ void AShooterCharacter::BeginPlay()
 		AnimInstance->Montage_Play(LevelStartMontage);
 		AnimInstance->Montage_JumpToSection(FName("LevelStart"));
 	}
+}
+
+void AShooterCharacter::AddControllerPitchInput(float Val)
+{
+	Super::AddControllerPitchInput(Val * BaseLookUpRate);
+}
+
+void AShooterCharacter::AddControllerYawInput(float Val)
+{
+	Super::AddControllerYawInput(Val * BaseTurnRate);
 }
 
 void AShooterCharacter::Tick(float DeltaTime)
@@ -286,8 +298,8 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	{
 		PlayerInputComponent->BindAxis("MoveForward", this, &AShooterCharacter::MoveForward);
 		PlayerInputComponent->BindAxis("MoveRight", this, &AShooterCharacter::MoveRight);
-		PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-		PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
+		PlayerInputComponent->BindAxis("Turn", this, &AShooterCharacter::AddControllerYawInput);
+		PlayerInputComponent->BindAxis("LookUp", this, &AShooterCharacter::AddControllerPitchInput);
 		PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ACharacter::Jump);
 		PlayerInputComponent->BindAction("FireButton", EInputEvent::IE_Pressed, this, &AShooterCharacter::FireWeapon);
 		PlayerInputComponent->BindAction("AimingButton", EInputEvent::IE_Pressed, this, &AShooterCharacter::AimingButtonPressed);
