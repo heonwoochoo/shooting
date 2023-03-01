@@ -64,7 +64,7 @@ protected:
 	void AutoFireReset();
 
 	/** Line trace for items under the crosshairs */
-	bool TraceUnderCrosshair(FHitResult& OutHitResult);
+	bool TraceUnderCrosshair(FHitResult& OutHitResult, FVector& OutHitLocation);
 
 public:	
 	virtual void Tick(float DeltaTime) override;
