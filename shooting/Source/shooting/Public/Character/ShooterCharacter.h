@@ -9,6 +9,7 @@ class UCameraComponent;
 class USoundCue;
 class UParticleSystem;
 class UAnimMontage;
+class AItem;
 
 UCLASS()
 class SHOOTING_API AShooterCharacter : public ACharacter
@@ -198,6 +199,8 @@ private:
 	/** Number of overlapped AItems */
 	int8 OverlappedItemCount;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
+	AItem* TraceHitItemLastFrame;
 
 	void CreateSpringArm();
 	void CreateCamera();	

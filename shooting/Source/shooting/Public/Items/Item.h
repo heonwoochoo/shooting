@@ -49,6 +49,5 @@ private:
 	USphereComponent* AreaSphere;
 
 public:
-	void SetPickupWidgetVisible(bool isVisible);
 	FORCEINLINE UWidgetComponent* GetPickupWidget() const { return PickupWidget; }
 };
