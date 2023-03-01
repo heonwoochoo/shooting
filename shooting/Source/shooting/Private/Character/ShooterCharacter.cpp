@@ -35,7 +35,8 @@ AShooterCharacter::AShooterCharacter() :
 	bFiringBullet(false),
 	AutomaticFireRate(0.1f),
 	bShouldFire(true),
-	bFireButtonPressed(false)
+	bFireButtonPressed(false),
+	bShouldTraceForItems(false)
 {
  	PrimaryActorTick.bCanEverTick = true;
 
@@ -58,15 +59,12 @@ void AShooterCharacter::BeginPlay()
 	{
 		CameraDefaultFOV = GetCamera()->FieldOfView;
 		CameraCurrentFOV = CameraDefaultFOV;
-		
 	}
 }
 
 void AShooterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	
 
 	// Handle interpolation for zoom when aiming
 	CameraInterpZoom(DeltaTime);
@@ -77,18 +75,8 @@ void AShooterCharacter::Tick(float DeltaTime)
 	// Calculate crosshair spread multiplier
 	CalculateCrosshairSpread(DeltaTime);
 
-	FHitResult ItemTraceResult;
-	FVector HitLocation;
-	TraceUnderCrosshair(ItemTraceResult, HitLocation);
-	if (ItemTraceResult.bBlockingHit)
-	{
-		AItem* HitItem = Cast<AItem>(ItemTraceResult.GetActor());
-		if (HitItem && HitItem->GetPickupWidget())
-		{
-			HitItem->GetPickupWidget()->SetVisibility(true);
-		}
-	}
-
+	// Check OverlappedItemCount, then trace for items
+	TraceForItems();
 }
 
 // Don't Rotate when the character controller rotates
@@ -102,6 +90,20 @@ void AShooterCharacter::BlockCharacterRotationWithCamera()
 float AShooterCharacter::GetCrosshairSpreadMultiplier() const
 {
 	return CrosshairSpreadMultiplier;
+}
+
+void AShooterCharacter::IncrementOverlappedItemCount(int8 Amount)
+{
+	if (OverlappedItemCount + Amount <= 0)
+	{
+		OverlappedItemCount = 0;
+		bShouldTraceForItems = false;
+	}
+	else
+	{
+		OverlappedItemCount += Amount;
+		bShouldTraceForItems = true;
+	}
 }
 
 void AShooterCharacter::CreateSpringArm()
@@ -453,6 +455,24 @@ bool AShooterCharacter::TraceUnderCrosshair(FHitResult& OutHitResult, FVector& O
 		}
 	}
 	return false;
+}
+
+void AShooterCharacter::TraceForItems()
+{
+	if (bShouldTraceForItems)
+	{
+		FHitResult ItemTraceResult;
+		FVector HitLocation;
+		TraceUnderCrosshair(ItemTraceResult, HitLocation);
+		if (ItemTraceResult.bBlockingHit)
+		{
+			AItem* HitItem = Cast<AItem>(ItemTraceResult.GetActor());
+			if (HitItem && HitItem->GetPickupWidget())
+			{
+				HitItem->GetPickupWidget()->SetVisibility(true);
+			}
+		}
+	}
 }
 
 void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
