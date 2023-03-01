@@ -31,7 +31,7 @@ AShooterCharacter::AShooterCharacter() :
 	CrosshairShootingFactor(0.f),
 	ShootTimeDuration(0.05f),
 	bFiringBullet(false),
-	AutomaticFireRate(0.5f),
+	AutomaticFireRate(0.1f),
 	bShouldFire(true),
 	bFireButtonPressed(false)
 {
