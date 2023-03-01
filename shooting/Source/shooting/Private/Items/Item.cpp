@@ -6,6 +6,7 @@
 #include "Character/ShooterCharacter.h"
 
 AItem::AItem()
+	: ItemName(FString("Default"))
 {
  	PrimaryActorTick.bCanEverTick = true;
 
