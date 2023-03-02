@@ -231,6 +231,13 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "ture"))
 	AItem* TraceHitItem;
 
+	/** Distance outward from the camera for the interp destination */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	float CameraInterpDistance;
+
+	/** Distance upward from the camera for the interp destination */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	float CameraInterpElevation;
 
 	void CreateSpringArm();
 	void CreateCamera();	
@@ -248,4 +255,7 @@ public:
 	/** Adds/subtracts to/from OverlappedItemCount and updates bShouldTraceForItems */
 	void IncrementOverlappedItemCount(int8 Amount);
 
+	FVector GetCameraInterpLocation();
+
+	void GetPickupItem(AItem* Item);
 };

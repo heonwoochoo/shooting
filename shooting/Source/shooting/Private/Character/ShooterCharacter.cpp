@@ -39,7 +39,9 @@ AShooterCharacter::AShooterCharacter() :
 	AutomaticFireRate(0.1f),
 	bShouldFire(true),
 	bFireButtonPressed(false),
-	bShouldTraceForItems(false)
+	bShouldTraceForItems(false),
+	CameraInterpDistance(250.f),
+	CameraInterpElevation(65.f)
 {
  	PrimaryActorTick.bCanEverTick = true;
 
@@ -108,6 +110,23 @@ void AShooterCharacter::IncrementOverlappedItemCount(int8 Amount)
 	{
 		OverlappedItemCount += Amount;
 		bShouldTraceForItems = true;
+	}
+}
+
+FVector AShooterCharacter::GetCameraInterpLocation()
+{
+	const FVector CameraWorldLocation{ Camera->GetComponentLocation() };
+	const FVector CameraForward{ Camera->GetForwardVector() };
+	// Desired = CameraWorldLocation + Forward * A + Up(direction) * B
+	return CameraWorldLocation + CameraForward * CameraInterpDistance + FVector(0.f, 0.f, CameraInterpElevation);
+}
+
+void AShooterCharacter::GetPickupItem(AItem* Item)
+{
+	auto Weapon = Cast<AWeapon>(Item);
+	if (Weapon)
+	{
+		SwapWeapon(Weapon);
 	}
 }
 
@@ -542,8 +561,7 @@ void AShooterCharacter::SelectButtonPressed()
 {
 	if (TraceHitItem)
 	{
-		auto TraceHitWeapon = Cast<AWeapon>(TraceHitItem);
-		SwapWeapon(TraceHitWeapon);
+		TraceHitItem->StartItemCurve(this);
 	}
 }
 
