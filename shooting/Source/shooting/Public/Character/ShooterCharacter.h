@@ -10,6 +10,7 @@ class USoundCue;
 class UParticleSystem;
 class UAnimMontage;
 class AItem;
+class AWeapon;
 
 UCLASS()
 class SHOOTING_API AShooterCharacter : public ACharacter
@@ -69,6 +70,8 @@ protected:
 
 	/** Trace for items if OverlappedItemCount > 0 */
 	void TraceForItems();
+
+	void SpawnDefaultWeapon();
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -199,8 +202,20 @@ private:
 	/** Number of overlapped AItems */
 	int8 OverlappedItemCount;
 
+	/** The AItem we hit last frame */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
 	AItem* TraceHitItemLastFrame;
+
+	/** Currently equipped Weapon */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	AWeapon* EquippedWeapon;
+
+	/** Set this in Blueprints for the default Weapon class */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AWeapon> DefaultWeaponClass;
+
+
+
 
 	void CreateSpringArm();
 	void CreateCamera();	

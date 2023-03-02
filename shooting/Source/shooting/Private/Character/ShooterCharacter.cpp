@@ -9,6 +9,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Items/Item.h"
 #include "Components/WidgetComponent.h"
+#include "Items/Weapon.h"
 
 AShooterCharacter::AShooterCharacter() :
 	BaseTurnRate(45.f),
@@ -60,6 +61,8 @@ void AShooterCharacter::BeginPlay()
 		CameraDefaultFOV = GetCamera()->FieldOfView;
 		CameraCurrentFOV = CameraDefaultFOV;
 	}
+
+	SpawnDefaultWeapon();
 }
 
 void AShooterCharacter::Tick(float DeltaTime)
@@ -490,6 +493,26 @@ void AShooterCharacter::TraceForItems()
 		// No longer overlapping any items,
 		// Item last frame should not show widget
 		TraceHitItemLastFrame->GetPickupWidget()->SetVisibility(false);
+	}
+}
+
+void AShooterCharacter::SpawnDefaultWeapon()
+{
+	// Check the TSubclassOf variable
+	if (DefaultWeaponClass)
+	{
+		// Spawn the Weapon
+		AWeapon* DefaultWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultWeaponClass);
+		// Get the Hand Socket
+		const USkeletalMeshSocket* HandSocket = GetMesh()->GetSocketByName(FName("RightHandSocket"));
+
+		if (HandSocket)
+		{
+			// Attach the Weapon to the socket RightHandSocket
+			HandSocket->AttachActor(DefaultWeapon, GetMesh());
+		}
+		// Set EquippedWeapon to the newly spawned Weapon
+		EquippedWeapon = DefaultWeapon;
 	}
 }
 
