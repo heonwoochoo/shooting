@@ -533,6 +533,7 @@ void AShooterCharacter::DropWeapon()
 	{
 		FDetachmentTransformRules DetachTransformRules(EDetachmentRule::KeepWorld, true);
 		EquippedWeapon->GetItemMesh()->DetachFromComponent(DetachTransformRules);
+		EquippedWeapon->SetItemState(EItemState::EIS_Falling);
 	}
 }
 
