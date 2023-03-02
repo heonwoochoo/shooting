@@ -133,6 +133,16 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
 	AShooterCharacter* Character;
 
+	/** X and Y for the Item while interping in the EquipInterping state */
+	float ItemInterpX;
+	float ItemInterpY;
+
+	/** Initial Yaw offset between the camera and the interping item */
+	float InterpInitialYawOffset;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
+	UCurveFloat* ItemScaleCurve;
+
 public:
 	FORCEINLINE UWidgetComponent* GetPickupWidget() const { return PickupWidget; }
 	FORCEINLINE USphereComponent* GetAreaSphere() const { return AreaSphere; }

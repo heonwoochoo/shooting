@@ -4,6 +4,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Character/ShooterCharacter.h"
+#include "Camera/CameraComponent.h"
 
 AItem::AItem() : 
 	ItemName(FString("Default")),
@@ -13,7 +14,10 @@ AItem::AItem() :
 	ZCurveTime(0.7f),
 	ItemInterpStartLocation(FVector(0.f)),
 	CameraTargetLocation(FVector(0.f)),
-	bInterping(false)
+	bInterping(false),
+	ItemInterpX(0.f),
+	ItemInterpY(0.f),
+	InterpInitialYawOffset(0.f)
 {
  	PrimaryActorTick.bCanEverTick = true;
 
@@ -178,6 +182,8 @@ void AItem::FinishInterping()
 	{
 		Character->GetPickupItem(this);
 	}
+	// Set scale back to normal
+	SetActorScale3D(FVector(1.f));
 }
 
 void AItem::ItemInterp(float DeltaTime)
@@ -199,9 +205,30 @@ void AItem::ItemInterp(float DeltaTime)
 		const FVector ItemToCamera{ FVector(0.f,0.f, (CameraInterpLocation - ItemLocation).Z) };
 		const float DeltaZ = ItemToCamera.Size();
 
+		const FVector CurrentLocation{ GetActorLocation() };
+		// Interpolated value
+		const float InterpXValue = FMath::FInterpTo(CurrentLocation.X, CameraInterpLocation.X, DeltaTime, 30.0f);
+		const float InterpYValue = FMath::FInterpTo(CurrentLocation.Y, CameraInterpLocation.Y, DeltaTime, 30.0f);
+
+		// Set X and Y of ItemLocation to Interped values
+		ItemLocation.X = InterpXValue;
+		ItemLocation.Y = InterpYValue;
+
 		// Adding curve value to the Z component of the Initial Locaiton (scaled by deltaZ)
 		ItemLocation.Z += CurveValue * DeltaZ;
 		SetActorLocation(ItemLocation, true, nullptr, ETeleportType::TeleportPhysics);
+	
+		// Camera rotation this frame
+		const FRotator CameraRotation{ Character->GetCamera()->GetComponentRotation() };
+		// Camera rotation + initial yaw offset
+		FRotator ItemRotation{ 0.f, CameraRotation.Yaw + InterpInitialYawOffset, 0.f };
+		SetActorRotation(ItemRotation, ETeleportType::TeleportPhysics);
+
+		if (ItemScaleCurve)
+		{
+			const float ScaleCurveValue = ItemScaleCurve->GetFloatValue(ElapsedTime);
+			SetActorScale3D(FVector(ScaleCurveValue));
+		}
 	}
 }
 
@@ -228,6 +255,13 @@ void AItem::StartItemCurve(AShooterCharacter* Char)
 	SetItemState(EItemState::EIS_EquipInterping);
 
 	GetWorldTimerManager().SetTimer(ItemInterpTimer, this, &AItem::FinishInterping, ZCurveTime);
+
+	// Get initial Yaw
+	const double CameraRotationYaw{ Character->GetCamera()->GetComponentRotation().Yaw };
+	const double ItemRotationYaw{ GetActorRotation().Yaw };
+	// Initial Yaw offset between camera and item
+	InterpInitialYawOffset = float(ItemRotationYaw - CameraRotationYaw);
+
 }
 
 
