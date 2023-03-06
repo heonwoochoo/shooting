@@ -113,6 +113,11 @@ protected:
 	/** Check to make sure our weapon has ammo */
 	bool WeaponHasAmmo();
 
+	void ReloadButtonPressed();
+	
+	/** Handle reloading of the weapon */
+	void ReloadWeapon();
+
 public:	
 	virtual void Tick(float DeltaTime) override;
 	
@@ -281,6 +286,13 @@ private:
 	/** Combat State, can only fire or reload if Unoccupied */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
 	ECombatState CombatState;
+
+	/** Montage for reload ammo */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* ReloadMontage;
+	
+	UFUNCTION(BlueprintCallable)
+	void FinishReloading();
 
 	void CreateSpringArm();
 	void CreateCamera();	

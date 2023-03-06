@@ -133,6 +133,13 @@ void AShooterCharacter::GetPickupItem(AItem* Item)
 	}
 }
 
+void AShooterCharacter::FinishReloading()
+{
+	// TODO: Updata AmmoMap
+
+	CombatState = ECombatState::ECS_Unoccupied;
+}
+
 void AShooterCharacter::CreateSpringArm()
 {
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
@@ -468,7 +475,7 @@ void AShooterCharacter::AutoFireReset()
 	}
 	else
 	{
-		// Reload Weapon
+		ReloadWeapon();
 	}
 }
 
@@ -617,6 +624,31 @@ bool AShooterCharacter::WeaponHasAmmo()
 	return EquippedWeapon->GetAmmo() > 0;
 }
 
+void AShooterCharacter::ReloadButtonPressed()
+{
+	ReloadWeapon();
+}
+
+void AShooterCharacter::ReloadWeapon()
+{
+	if (CombatState != ECombatState::ECS_Unoccupied) return;
+
+	// Do we have ammo of the correct type?
+	if (true) // replace with CarryingAmmo()
+	{
+		// TODO : Create an enum for Weapon Type
+		// TODO : switch on EquippedWeapon->WeaponType
+		FName MontageSection(TEXT("ReloadSMG"));
+
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance && ReloadMontage)
+		{
+			AnimInstance->Montage_Play(ReloadMontage);
+			AnimInstance->Montage_JumpToSection(MontageSection);
+		}
+	}
+}
+
 void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -636,5 +668,6 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		PlayerInputComponent->BindAction("AimingButton", EInputEvent::IE_Released, this, &AShooterCharacter::AimingButtonReleased);
 		PlayerInputComponent->BindAction("Select", EInputEvent::IE_Pressed, this, &AShooterCharacter::SelectButtonPressed);
 		PlayerInputComponent->BindAction("Select", EInputEvent::IE_Released, this, &AShooterCharacter::SelectButtonReleased);
+		PlayerInputComponent->BindAction("ReloadButton", EInputEvent::IE_Pressed, this, &AShooterCharacter::ReloadButtonPressed);
 	}
 }
