@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "../../AmmoType.h"
 #include "ShooterCharacter.generated.h"
 
 class USpringArmComponent;
@@ -12,14 +13,7 @@ class UAnimMontage;
 class AItem;
 class AWeapon;
 
-UENUM()
-enum class EAmmoType : uint8
-{
-	EAT_9mm UMETA(DisplayName = "9mm"),
-	EAT_AR UMETA(DisplayName = "AssultRifle"),
 
-	EAT_MAX UMETA(DisplayName = "Default MAX")
-};
 
 UENUM()
 enum class ECombatState : uint8
@@ -117,6 +111,10 @@ protected:
 	
 	/** Handle reloading of the weapon */
 	void ReloadWeapon();
+
+	/** Checks to see if we have ammo of the EquippedWeapon's ammo type */
+	bool CarryingAmmo();
+
 
 public:	
 	virtual void Tick(float DeltaTime) override;
