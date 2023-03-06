@@ -41,7 +41,9 @@ AShooterCharacter::AShooterCharacter() :
 	bFireButtonPressed(false),
 	bShouldTraceForItems(false),
 	CameraInterpDistance(250.f),
-	CameraInterpElevation(65.f)
+	CameraInterpElevation(65.f),
+	Starting9mmAmmo(85),
+	StartingARAmmo(120)
 {
  	PrimaryActorTick.bCanEverTick = true;
 
@@ -576,6 +578,12 @@ void AShooterCharacter::SwapWeapon(AWeapon* WeaponToSwap)
 	EquipWeapon(WeaponToSwap);
 	TraceHitItem = nullptr;
 	TraceHitItemLastFrame = nullptr;
+}
+
+void AShooterCharacter::InitializeAmmoMap()
+{
+	AmmoMap.Add(EAmmoType::EAT_9mm, Starting9mmAmmo);
+	AmmoMap.Add(EAmmoType::EAT_AR, StartingARAmmo);
 }
 
 void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

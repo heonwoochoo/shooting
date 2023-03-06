@@ -12,6 +12,15 @@ class UAnimMontage;
 class AItem;
 class AWeapon;
 
+UENUM()
+enum class EAmmoType : uint8
+{
+	EAT_9mm UMETA(DisplayName = "9mm"),
+	EAT_AR UMETA(DisplayName = "AssultRifle"),
+
+	EAT_MAX UMETA(DisplayName = "Default MAX")
+};
+
 UCLASS()
 class SHOOTING_API AShooterCharacter : public ACharacter
 {
@@ -85,6 +94,9 @@ protected:
 	
 	/** Drops currently equipped Weapon and Equips TraceHitItem */
 	void SwapWeapon(AWeapon* WeaponToSwap);
+
+	/** Initialize the Ammo Map with ammo values */
+	void InitializeAmmoMap();
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -228,16 +240,29 @@ private:
 	TSubclassOf<AWeapon> DefaultWeaponClass;
 
 	/** The item currently hit by our trace in TraceForItems (could be null)*/
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "ture"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "ture"))
 	AItem* TraceHitItem;
 
 	/** Distance outward from the camera for the interp destination */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
 	float CameraInterpDistance;
 
 	/** Distance upward from the camera for the interp destination */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
 	float CameraInterpElevation;
+
+	/** Map to keep track of ammo of the different ammo types */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
+	TMap<EAmmoType, int32> AmmoMap;
+
+	/** Starting amount of 9mm ammo */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Items, meta = (AllowPrivateAccess = "true"))
+	int32 Starting9mmAmmo;
+
+	/** Starting amount of AR ammo */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Items, meta = (AllowPrivateAccess = "true"))
+	int32 StartingARAmmo;
+
 
 	void CreateSpringArm();
 	void CreateCamera();	
