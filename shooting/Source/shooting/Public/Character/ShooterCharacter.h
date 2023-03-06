@@ -21,6 +21,16 @@ enum class EAmmoType : uint8
 	EAT_MAX UMETA(DisplayName = "Default MAX")
 };
 
+UENUM()
+enum class ECombatState : uint8
+{
+	ECS_Unoccupied UMETA(DisplayName = "Unoccupied"),
+	ECS_FireTimerProgress UMETA(DisplayName = "FireTimerProgress"),
+	ECS_Reloading UMETA(DisplayName = "Reloading"),
+
+	ECS_MAX UMETA(DisplayName = "Default MAX")
+};
+
 UCLASS()
 class SHOOTING_API AShooterCharacter : public ACharacter
 {
@@ -46,6 +56,8 @@ protected:
 	void FireWeapon();
 	void SpawnMuzzleFlashParticles(const FTransform& SocketTransform);
 	void PlayFireSound();
+	void SendBullet();
+	void PlayGunFireMontage();
 	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FVector& OutBeamLocation);
 	void SpawnBeamParticles(const FTransform& SocketTransform, const FVector& BeamEnd);
 	void SpawnImpactParticles(const FVector& BeamEnd);
@@ -266,6 +278,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Items, meta = (AllowPrivateAccess = "true"))
 	int32 StartingARAmmo;
 
+	/** Combat State, can only fire or reload if Unoccupied */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
+	ECombatState CombatState;
 
 	void CreateSpringArm();
 	void CreateCamera();	
