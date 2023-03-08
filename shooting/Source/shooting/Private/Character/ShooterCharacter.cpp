@@ -130,6 +130,11 @@ FVector AShooterCharacter::GetCameraInterpLocation()
 
 void AShooterCharacter::GetPickupItem(AItem* Item)
 {
+	if (Item->GetEquipSound())
+	{
+		UGameplayStatics::PlaySound2D(this, Item->GetEquipSound());
+	}
+
 	auto Weapon = Cast<AWeapon>(Item);
 	if (Weapon)
 	{
@@ -628,6 +633,11 @@ void AShooterCharacter::SelectButtonPressed()
 	if (TraceHitItem)
 	{
 		TraceHitItem->StartItemCurve(this);
+
+		if (TraceHitItem->GetPickupSound())
+		{
+			UGameplayStatics::PlaySound2D(this, TraceHitItem->GetPickupSound());
+		}
 	}
 }
 
@@ -682,7 +692,7 @@ void AShooterCharacter::ReloadWeapon()
 bool AShooterCharacter::CarryingAmmo()
 {
 	if (EquippedWeapon == nullptr) return false;
-
+	
 	auto AmmoType = EquippedWeapon->GetAmmoType();
 
 	if (AmmoMap.Contains(AmmoType))
