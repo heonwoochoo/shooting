@@ -23,11 +23,11 @@ AShooterCharacter::AShooterCharacter() :
 	AimingLookUpRate(20.f),
 	MouseHipTurnRate(1.0f),
 	MouseHipLookUpRate(1.0f),
-	MouseAimingTurnRate(0.2f),
-	MouseAimingLookUpRate(0.2f),
+	MouseAimingTurnRate(0.6f),
+	MouseAimingLookUpRate(0.6f),
 	bAiming(false),
 	CameraDefaultFOV(0.f),	// set in BeginPlay
-	CameraZoomedFOV(35.f),
+	CameraZoomedFOV(25.f),
 	CameraCurrentFOV(0.f),
 	ZoomInterpSpeed(20.f),
 	CrosshairSpreadMultiplier(0.f),
@@ -195,8 +195,8 @@ void AShooterCharacter::CreateSpringArm()
 {
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(GetRootComponent());
-	SpringArm->TargetArmLength = 180.f;
-	SpringArm->SocketOffset = FVector(0.f,50.f,45.f);
+	SpringArm->TargetArmLength = 240.f;
+	SpringArm->SocketOffset = FVector(0.f,35.f,80.f);
 	SpringArm->bUsePawnControlRotation = true;
 }
 
@@ -396,11 +396,16 @@ void AShooterCharacter::SpawnImpactParticles(const FVector& BeamEnd)
 void AShooterCharacter::AimingButtonPressed()
 {
 	bAiming = true;
+	GetCharacterMovement()->MaxWalkSpeed = CrouchMovementSpeed;
 }
 
 void AShooterCharacter::AimingButtonReleased()
 {
 	bAiming = false;
+	if (!bCrouching)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = BaseMovementSpeed;
+	}
 }
 
 void AShooterCharacter::CameraInterpZoom(float DeltaTime)
