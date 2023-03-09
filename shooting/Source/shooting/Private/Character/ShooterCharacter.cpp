@@ -52,7 +52,8 @@ AShooterCharacter::AShooterCharacter() :
 	StandingCapsuleHalfHeight(88.f),
 	CrouchingCapsuleHalfHeight(44.f),
 	BaseGroundFriction(2.f),
-	CrouchingGroundFriction(100.f)
+	CrouchingGroundFriction(100.f),
+	bAimingButtonPressed(false)
 {
  	PrimaryActorTick.bCanEverTick = true;
 
@@ -160,6 +161,11 @@ void AShooterCharacter::FinishReloading()
 {
 	// Update the Combat State
 	CombatState = ECombatState::ECS_Unoccupied;
+
+	if (bAimingButtonPressed)
+	{
+		Aim();
+	}
 
 	if (EquippedWeapon == nullptr) return;
 
@@ -395,17 +401,17 @@ void AShooterCharacter::SpawnImpactParticles(const FVector& BeamEnd)
 
 void AShooterCharacter::AimingButtonPressed()
 {
-	bAiming = true;
-	GetCharacterMovement()->MaxWalkSpeed = CrouchMovementSpeed;
+	bAimingButtonPressed = true;
+	if (CombatState != ECombatState::ECS_Reloading)
+	{
+		Aim();
+	}
 }
 
 void AShooterCharacter::AimingButtonReleased()
 {
-	bAiming = false;
-	if (!bCrouching)
-	{
-		GetCharacterMovement()->MaxWalkSpeed = BaseMovementSpeed;
-	}
+	bAimingButtonPressed = false;
+	StopAiming();
 }
 
 void AShooterCharacter::CameraInterpZoom(float DeltaTime)
@@ -693,11 +699,16 @@ void AShooterCharacter::ReloadButtonPressed()
 void AShooterCharacter::ReloadWeapon()
 {
 	if (CombatState != ECombatState::ECS_Unoccupied) return;
+	
 	if (EquippedWeapon == nullptr) return;
 
 	// Do we have ammo of the correct type?
 	if (CarryingAmmo() && !EquippedWeapon->ClipIsFull())
 	{
+		if (bAiming)
+		{
+			StopAiming();
+		}
 		CombatState = ECombatState::ECS_Reloading;
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (AnimInstance && ReloadMontage)
@@ -796,6 +807,21 @@ void AShooterCharacter::InterpCapsuleHalfHeight(float DeltaTime)
 	GetMesh()->AddLocalOffset(MeshOffset);
 
 	GetCapsuleComponent()->SetCapsuleHalfHeight(InterpHalfHeight);
+}
+
+void AShooterCharacter::Aim()
+{
+	bAiming = true;
+	GetCharacterMovement()->MaxWalkSpeed = CrouchMovementSpeed;
+}
+
+void AShooterCharacter::StopAiming()
+{
+	bAiming = false;
+	if (!bCrouching)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = BaseMovementSpeed;
+	}
 }
 
 void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
