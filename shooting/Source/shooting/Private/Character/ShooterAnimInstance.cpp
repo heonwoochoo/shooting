@@ -17,7 +17,9 @@ UShooterAnimInstance::UShooterAnimInstance() :
 	RootYawOffset(0.f),
 	Pitch(0.f),
 	bReloading(false),
-	OffsetState(EOffsetState::EOS_Hip)
+	OffsetState(EOffsetState::EOS_Hip),
+	RecoilWeight(1.f),
+	bTurningInPlace(false)
 {
 }
 
@@ -30,6 +32,7 @@ void UShooterAnimInstance::UpdateAnimationProperties(float DeltaTime)
 
 	if (ShooterCharacter)
 	{
+		bCrouching = ShooterCharacter->GetCrouching();
 		bReloading = ShooterCharacter->GetCombatState() == ECombatState::ECS_Reloading;
 
 		SetCharacterSpeed();
@@ -101,6 +104,7 @@ void UShooterAnimInstance::TurnInPlace()
 		const float Turning{ GetCurveValue(TEXT("Turning")) };
 		if (Turning > 0)
 		{
+			bTurningInPlace = true;
 			RotationCurveLastFrame = RotationCurve;
 			RotationCurve = GetCurveValue(TEXT("Rotation"));
 			const float DeltaRotation{ RotationCurve - RotationCurveLastFrame };
@@ -115,7 +119,47 @@ void UShooterAnimInstance::TurnInPlace()
 				RootYawOffset > 0 ? RootYawOffset -= YawExcess : RootYawOffset += YawExcess;
 			}
 		}
-		if (GEngine) GEngine->AddOnScreenDebugMessage(1, -1, FColor::Blue, FString::Printf(TEXT("RootYawOffset : %f"), RootYawOffset));
+		else
+		{
+			bTurningInPlace = false;
+		}
+
+		if (bTurningInPlace)
+		{
+			if (bReloading)
+			{
+				RecoilWeight = 1.f;
+			}
+			else
+			{
+				RecoilWeight = 0.f;
+			}
+		}
+		else // not turning in place
+		{
+			if (bCrouching)
+			{
+				if (bReloading)
+				{
+					RecoilWeight = 1.f;
+				}
+				else
+				{
+					RecoilWeight = 0.1f;
+				}
+			}
+			else
+			{
+				if (bAiming || bReloading)
+				{
+					RecoilWeight = 1.f;
+				}
+				else
+				{
+					RecoilWeight = 0.5f;
+				}
+			}
+		}
 	}
 }
 
@@ -130,8 +174,6 @@ void UShooterAnimInstance::Lean(float DeltaTime)
 	const double Target{ (Delta.Yaw) / DeltaTime };
 	const double Interp{ FMath::FInterpTo(YawDelta, Target, DeltaTime, 6.f) };
 	YawDelta = FMath::Clamp(Interp, -90.f, 90.f);
-	if (GEngine) GEngine->AddOnScreenDebugMessage(2, -1, FColor::Red, FString::Printf(TEXT("Delta Yaw : %f"), Delta.Yaw));
-	if (GEngine) GEngine->AddOnScreenDebugMessage(3, -1, FColor::Cyan, FString::Printf(TEXT("YawDelta : %f"), YawDelta));
 }
 
 // Is the character accelerating ?
